@@ -1,14 +1,11 @@
 
-from global_const import app_config
-
-import sys
-sys.path.append(app_config.path.text_color)
-from color_print import const
+# from global_const import app_config
+# import sys
 
 import paho.mqtt.client as mqtt
-
-sys.path.append('/home/znkzjs/bot/python')
+# pylib
 from singleton import Singleton
+from terminal_font_color import TerminalFontColor
 
 
 
@@ -21,23 +18,23 @@ class MqttHelper(metaclass=Singleton):
         self.__mqtt = mqtt
         self.__mqtt = mqtt.Client("sower-2039-1004")  # create new instance
 
-        self.__YELLOW = const.print_color.fore.yellow
-        self.__GREEN = const.print_color.fore.green
-        self.__RED = const.print_color.fore.red
-        self.__RESET = const.print_color.control.reset
+        self.__YELLOW = TerminalFontColor.Fore.yellow
+        self.__GREEN = TerminalFontColor.Fore.green
+        self.__RED = TerminalFontColor.Fore.red
+        self.__RESET = TerminalFontColor.Control.reset
         self.mqtt_system_turn_on = True
         self.__invoke_eye = None
         self.__on_message_callbacks = []
 
-    def connect_broker(self, broker='', port=0, uid='', psw=''):
-        if broker == '':
-            broker = app_config.server.mqtt.broker_addr
-        if uid == '':
-            uid = app_config.server.mqtt.username
-        if psw == '':
-            psw = app_config.server.mqtt.password
-        if port == 0:
-            port = app_config.server.mqtt.port
+    def connect_broker(self, broker, port, uid, psw):
+        # if broker == '':
+        #     broker = app_config.server.mqtt.broker_addr
+        # if uid == '':
+        #     uid = app_config.server.mqtt.username
+        # if psw == '':
+        #     psw = app_config.server.mqtt.password
+        # if port == 0:
+        #     port = app_config.server.mqtt.port
 
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
@@ -98,7 +95,7 @@ class MqttHelper(metaclass=Singleton):
 g_mqtt = MqttHelper()
 
 if __name__ == "__main__":
-    g_mqtt.connect_broker()
+    g_mqtt.connect_broker('voicevon.vicp.io', 1883, 'von','von1970')
     g_mqtt.publish_float('sower/eye/outside/height', 1)
 
 
