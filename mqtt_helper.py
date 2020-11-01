@@ -1,5 +1,5 @@
 
-# from global_const import app_config
+# from app_config import AppConfig
 # import sys
 
 import paho.mqtt.client as mqtt
@@ -28,13 +28,13 @@ class MqttHelper(metaclass=Singleton):
 
     def connect_broker(self, broker, port, uid, psw):
         # if broker == '':
-        #     broker = app_config.server.mqtt.broker_addr
+        #     broker = AppConfig.server.mqtt.broker_addr
         # if uid == '':
-        #     uid = app_config.server.mqtt.username
+        #     uid = AppConfig.server.mqtt.username
         # if psw == '':
-        #     psw = app_config.server.mqtt.password
+        #     psw = AppConfig.server.mqtt.password
         # if port == 0:
-        #     port = app_config.server.mqtt.port
+        #     port = AppConfig.server.mqtt.port
 
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
@@ -65,7 +65,7 @@ class MqttHelper(metaclass=Singleton):
             invoking(message.topic, payload)
 
     def publish_init(self):
-        #  traverse app_config, publish all elements to broker with default values
+        #  traverse AppConfig, publish all elements to broker with default values
         pass
     
     def publish_cv_image(self, flag):
