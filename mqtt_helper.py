@@ -5,7 +5,7 @@
 import paho.mqtt.client as mqtt
 # pylib
 from singleton import Singleton
-from terminal_font_color import TerminalFontColor
+from terminal_font import TerminalFont
 
 
 
@@ -18,10 +18,10 @@ class MqttHelper(metaclass=Singleton):
         self.__mqtt = mqtt
         self.__mqtt = mqtt.Client("sower-2039-1004")  # create new instance
 
-        self.__YELLOW = TerminalFontColor.Fore.yellow
-        self.__GREEN = TerminalFontColor.Fore.green
-        self.__RED = TerminalFontColor.Fore.red
-        self.__RESET = TerminalFontColor.Control.reset
+        self.__YELLOW = TerminalFont.Color.Fore.yellow
+        self.__GREEN = TerminalFont.Color.Fore.green
+        self.__RED = TerminalFont.Color.Fore.red
+        self.__RESET = TerminalFont.Color.Control.reset
         self.mqtt_system_turn_on = True
         self.__invoke_eye = None
         self.__on_message_callbacks = []
