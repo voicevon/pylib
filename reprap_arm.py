@@ -99,7 +99,6 @@ class ReprapArm(metaclass=Singleton):
                 time.sleep(0.1)
             elif self.__echo_is_on:
                 print("<<< " + response)
-
     @abstractmethod
     def set_joints_angle_in_degree(self, IK_dict):
         print('set_joints_angle_in_degree not implatemented')
@@ -164,5 +163,8 @@ class TestArm(ReprapArm):
 
 if __name__ == "__main__":
     test = TestArm()
+    test.set_echo_on(True)
     test.connect_reprap_controller('/dev/ttyUSB0', 115200)
+    test.bridge_send_gcode_mcode('M114')
+    test.home(home_y=True)
 
