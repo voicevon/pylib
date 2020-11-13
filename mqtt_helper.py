@@ -95,7 +95,10 @@ class MqttHelper(metaclass=Singleton):
 g_mqtt = MqttHelper()
 
 if __name__ == "__main__":
+    # put this line to your system_setup()
     g_mqtt.connect_broker('voicevon.vicp.io', 1883, 'von','von1970')
+    
+    # put this line to anywhere.
     g_mqtt.publish_float('sower/eye/outside/height', 1)
 
 
