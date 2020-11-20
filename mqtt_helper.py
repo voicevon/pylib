@@ -1,12 +1,8 @@
-
-# from app_config import AppConfig
-# import sys
-
 import paho.mqtt.client as mqtt
 # pylib
 from singleton import Singleton
 from terminal_font import TerminalFont
-
+import cv2
 
 
 class MqttHelper(metaclass=Singleton):
@@ -27,21 +23,12 @@ class MqttHelper(metaclass=Singleton):
         self.__on_message_callbacks = []
 
     def connect_broker(self, broker, port, uid, psw):
-        # if broker == '':
-        #     broker = AppConfig.server.mqtt.broker_addr
-        # if uid == '':
-        #     uid = AppConfig.server.mqtt.username
-        # if psw == '':
-        #     psw = AppConfig.server.mqtt.password
-        # if port == 0:
-        #     port = AppConfig.server.mqtt.port
-
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
-        if self.__mqtt.is_connected():
-            print(self.__GREEN + '[Info]: MQTT has connected to: %s' % broker + self.__RESET)
-        else:
-            print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s' % broker + self.__RESET)
+        # if self.__mqtt.is_connected():
+        #     print(self.__GREEN + '[Info]: MQTT has connected to: %s' % broker + self.__RESET)
+        # else:
+        #     print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s' % broker + self.__RESET)
 
         self.__mqtt.loop_start()
         self.__mqtt.on_message = self.__mqtt_on_message
@@ -65,31 +52,24 @@ class MqttHelper(metaclass=Singleton):
             invoking(message.topic, payload)
 
     def publish_init(self):
-        #  traverse AppConfig, publish all elements to broker with default values
+        #  traverse Json file, publish all elements to broker with default values
         pass
     
-    def publish_cv_image(self, flag):
+    def publish_cv_image(self, topic, cv_image, retain=True):
       # return image as mqtt message payload
-        # f= open("Python/test.jpg")
-        # content = f.read()
-        # byte_im = bytearray(content)
+        is_success, img_encode = cv2.imencode(".jpg", cv_image)
+        if is_success:
+            img_pub = img_encode.tobytes()
+            self.__mqtt.publish(topic, img_pub, retain=retain)
 
-
-
-        # im = cv2.imread('test.jpg')
-        # im_resize = cv2.resize(im, (500, 500))
-        # is_success, im_buf_arr = cv2.imencode(".jpg", im_resize)
-        # byte_im = im_buf_arr.tobytes()
-        filename = 'test.jpg'
-        if flag:
-            filename = 'star.png'
-
-        with open(filename, 'rb') as f:
+    def publish_file_image(self, topic, file_name, retain=True):
+        with open(file_name, 'rb') as f:
             byte_im = f.read()
         self.__mqtt.publish('sower/img/bin',byte_im )
-    
-    def publish_float(self, topic, value):
+
+    def publish(self, topic, value):
         self.__mqtt.publish(topic, value, qos=2, retain =True)
+    
 
 
 g_mqtt = MqttHelper()
