@@ -32,17 +32,19 @@ class MqttHelper(metaclass=Singleton):
 
         self.__mqtt.loop_start()
         self.__mqtt.on_message = self.__mqtt_on_message
+        self.__do_debug_print_out = False
         # self.__mqtt.loop_stop()
         return self.__mqtt
 
-    def append_on_message_callback(self, callback):
+    def append_on_message_callback(self, callback, do_debug_print_out=False):
             self.__on_message_callbacks.append(callback)
+            self.__do_debug_print_out = do_debug_print_out
     
     def subscribe(self, topic, qos=0):
         self.__mqtt.subscribe(topic, qos)
     
-    def __mqtt_on_message(self, client, userdata, message, do_debug_print_out=False):
-        if do_debug_print_out:
+    def __mqtt_on_message(self, client, userdata, message):
+        if self.__do_debug_print_out:
             print("message received ", str(message.payload.decode("utf-8")))
             print("message topic=", message.topic)
             print("message qos=", message.qos)
@@ -79,6 +81,6 @@ if __name__ == "__main__":
     g_mqtt.connect_broker('voicevon.vicp.io', 1883, 'von','von1970')
     
     # put this line to anywhere.
-    g_mqtt.publish_float('sower/eye/outside/height', 1)
+    g_mqtt.publish('test/test1/test2', 1)
 
 
