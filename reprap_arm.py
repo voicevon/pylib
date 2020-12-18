@@ -13,7 +13,7 @@ import serial.tools.list_ports
 
 import sys
 sys.path.append('/home/znkzjs/bot/python')
-from singleton import Singleton
+# from singleton import Singleton
 
 from enum import Enum
 #TODO: add mqtt
@@ -25,7 +25,8 @@ class HARD_ROBOT_ONLINE_LEVEL(Enum):
     ONLINE_AS_SOWER = 3
     HOMED = 4
 
-class ReprapArm(metaclass=Singleton):
+# class ReprapArm(metaclass=Singleton):
+class ReprapArm():
     '''
     Can communacate with reprap_arm,  for example:  Marlin
     Send gcode to serial, confirm Reprap got the gcode correctly.
