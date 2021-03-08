@@ -153,6 +153,12 @@ class ReprapArm():
 
     def bridge_send_gcode_mcode(self, the_code):
         self.__send_gcode_mcode(the_code)
+    
+    def set_servo_position(self, pwm_id=0, angle=11):
+        mcode = 'M280 P' + str(pwm_id) +  ' S' + str(angle)
+        print(mcode)
+        self.__send_gcode_mcode(mcode)
+
 
     @abstractmethod
     def home_all_joints(self):
