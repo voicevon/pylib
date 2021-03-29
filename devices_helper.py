@@ -32,9 +32,9 @@ class DevicesHelper():
 if __name__ == "__main__":
     helper = DevicesHelper()
     helper.serial_port_list_all()
-    portname = helper.serial_port_from_location('1-2.1.1')
+    portname = helper.serial_port_from_location('1-2.4.1')
     print(portname)
-    portname = helper.serial_port_from_location('1-2.1.2')
+    portname = helper.serial_port_from_location('1-2.4.4')
     print(portname)
 
 
