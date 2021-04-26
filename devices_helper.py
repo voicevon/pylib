@@ -13,8 +13,8 @@ class DevicesHelper():
     def serial_port_from_location(self, location):
         myports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
         for port_name,chip,detail in myports:
-            xx =  detail[-7:]
-            # print(xx)
+            xx =  detail[-5:]
+            print(xx)
             if xx == location:
                 return port_name
 
@@ -22,9 +22,9 @@ class DevicesHelper():
         myports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
         for port_name,chip,detail in myports:
             print('-------------------------------------')
-            print(port_name)
-            print(chip)
-            print(detail)
+            print('name =', port_name)
+            print('chip=',chip)
+            print('detail=',detail)
 
    
 
@@ -32,9 +32,9 @@ class DevicesHelper():
 if __name__ == "__main__":
     helper = DevicesHelper()
     helper.serial_port_list_all()
-    portname = helper.serial_port_from_location('1-2.4.1')
+    portname = helper.serial_port_from_location('1-2.4')
     print(portname)
-    portname = helper.serial_port_from_location('1-2.4.4')
+    portname = helper.serial_port_from_location('1-2.3')
     print(portname)
 
 
