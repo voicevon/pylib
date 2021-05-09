@@ -25,10 +25,10 @@ class MqttHelper(metaclass=Singleton):
     def connect_broker(self, broker, port, uid, psw):
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
-        # if self.__mqtt.is_connected():
-        #     print(self.__GREEN + '[Info]: MQTT has connected to: %s' % broker + self.__RESET)
-        # else:
-        #     print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s' % broker + self.__RESET)
+        if self.__mqtt.is_connected():
+            print(self.__GREEN + '[Info]: MQTT has connected to: %s' % broker + self.__RESET)
+        else:
+            print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s, Is trying auto connect backgroundly.' % broker + self.__RESET)
 
         self.__mqtt.loop_start()
         self.__mqtt.on_message = self.__mqtt_on_message
