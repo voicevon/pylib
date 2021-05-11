@@ -11,18 +11,20 @@ class MqttHelper(metaclass=Singleton):
     def __init__(self):
         # super(MqttHelper, self).__init__()
         self.__is_connected = False
-        self.__mqtt = mqtt
-        self.__mqtt = mqtt.Client("sower-2039-1004")  # create new instance
+        self.__mqtt = None
+        # self.__mqtt = mqtt
+        # self.__mqtt = mqtt.Client(client_id)  # create new instance
 
         self.__YELLOW = TerminalFont.Color.Fore.yellow
         self.__GREEN = TerminalFont.Color.Fore.green
         self.__RED = TerminalFont.Color.Fore.red
         self.__RESET = TerminalFont.Color.Control.reset
-        self.mqtt_system_turn_on = True
+        # self.mqtt_system_turn_on = True
         self.__invoke_eye = None
         self.__on_message_callbacks = []
 
-    def connect_broker(self, broker, port, uid, psw):
+    def connect_to_broker(self, client_id, broker, port, uid, psw):
+        self.__mqtt = mqtt.Client(client_id)  # create new instance
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
         if self.__mqtt.is_connected():
@@ -78,7 +80,7 @@ g_mqtt = MqttHelper()
 
 if __name__ == "__main__":
     # put this line to your system_setup()
-    g_mqtt.connect_broker('voicevon.vicp.io', 1883, 'von','von1970')
+    g_mqtt.connect_to_broker('123456', 'voicevon.vicp.io', 1883, 'von','von1970')
     
     # put this line to anywhere.
     g_mqtt.publish('test/test1/test2', 1)
