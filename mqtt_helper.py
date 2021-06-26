@@ -33,8 +33,18 @@ class MqttHelper(metaclass=Singleton):
         self.__on_message_callbacks = []
         self.__configable_vars = []
 
+    def on_connect(self,userdata,flags,rc):
+        if rc==0:
+            self.connected_flag=True #set flag
+            print("MQTT connected OK. Start subscribe.  Returned code=",rc)
+            #client.subscribe(topic)
+            self.auto_subscribe()
+        else:
+            print("Bad connection Returned code= ",rc)      
+
     def connect_to_broker(self, client_id, broker, port, uid, psw):
         self.__mqtt = mqtt.Client(client_id)  # create new instance
+        self.__mqtt.on_connect = self.on_connect  # binding call back function 
         self.__mqtt.username_pw_set(username=uid, password=psw)
         self.__mqtt.connect(broker, port=port)
         if self.__mqtt.is_connected():
