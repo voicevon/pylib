@@ -62,6 +62,64 @@ class MqttHelper(metaclass=Singleton):
     def subscribe(self, topic, qos=0):
         self.__mqtt.subscribe(topic, qos)
     
+    def auto_subscribe(self, qos=1, space_len=0):
+        '''
+        call append_configable_var() in advance.
+        '''
+        target_type_name = 'MqttConfigableItem'
+        if space_len / 8 >= 3:
+            return
+        for var in self.__configable_vars:
+            for this_item in dir(var):
+                if this_item[:1] != '_':
+                    attr = getattr(var,this_item)
+                    type_name =type(attr).__name__
+                    # space = ' ' * space_len
+                    if type_name == target_type_name:
+                        # For better understanding, we rename attr.
+                        configable_item = attr  
+                        # print ('aaaa', space + configable_item, type_name)
+                        for type_value_topic in dir(configable_item):
+                            # print('bbbb',type_value_topic)
+                            if type_value_topic == 'topic':
+                                topic_string = getattr(configable_item,type_value_topic)
+                                # print('cccc', type_value_topic,topic_string)
+                                self.__mqtt.subscribe(topic_string,qos)
+                    else:
+                        self.find_member(attr, target_type_name, space_len + 4)
+
+    def update_from_topic(self, topic, value, space_len=0):
+        '''
+        call append_configable_var() in advance.
+        '''
+        target_type_name = 'MqttConfigableItem'
+        if space_len / 8 >= 3:
+            return
+        for var in self.__configable_vars:
+            for this_item in dir(var):
+                if this_item[:1] != '_':
+                    attr = getattr(var,this_item)
+                    type_name =type(attr).__name__
+                    # space = ' ' * space_len
+
+                    if type_name == target_type_name:
+                        # For better understanding, we rename attr.
+                        configable_item = attr  
+                        # print ('aaaa', space + configable_item, type_name)
+                        for type_value_topic in dir(configable_item):
+                            # print('bbbb',type_value_topic)
+                            if type_value_topic == 'topic':
+                                topic_string = getattr(configable_item,type_value_topic)
+                                # print('cccc', type_value_topic,topic_string)
+                                if topic_string == topic:
+                                    # print('ffff',type_value_topic,topic_string)
+                                    if topic_string == topic:
+                                        # print('RRRRRRRRRRRR', configable_item, type_value_topic, value)
+                                        #TODO: type checking here.
+                                        setattr(configable_item,'value',value)
+                    else:
+                        self.find_member(attr, target_type_name, space_len + 4)
+    
     def __mqtt_on_message(self, client, userdata, message):
         if self.__do_debug_print_out:
             print("MQTT message received ", str(message.payload.decode("utf-8")))
@@ -94,34 +152,6 @@ class MqttHelper(metaclass=Singleton):
     def publish(self, topic, value):
         self.__mqtt.publish(topic, value, qos=2, retain =True)
     
-    def update_from_topic(self, topic, value, space_len=0):
-        target_type_name = 'MqttConfigableItem'
-        if space_len / 8 >= 3:
-            return
-        for var in self.__configable_vars:
-            for this_item in dir(var):
-                if this_item[:1] != '_':
-                    attr = getattr(var,this_item)
-                    type_name =type(attr).__name__
-                    # space = ' ' * space_len
-
-                    if type_name == target_type_name:
-                        # For better understanding, we rename attr.
-                        configable_item = attr  
-                        # print ('aaaa', space + configable_item, type_name)
-                        for type_value_topic in dir(configable_item):
-                            # print('bbbb',type_value_topic)
-                            if type_value_topic == 'topic':
-                                topic_string = getattr(configable_item,type_value_topic)
-                                # print('cccc', type_value_topic,topic_string)
-                                if topic_string == topic:
-                                    # print('ffff',type_value_topic,topic_string)
-                                    if topic_string == topic:
-                                        # print('RRRRRRRRRRRR', configable_item, type_value_topic, value)
-                                        #TODO: type checking here.
-                                        setattr(configable_item,'value',value)
-                    else:
-                        self.find_member(attr, target_type_name, space_len + 4)
 
 g_mqtt = MqttHelper()
 
