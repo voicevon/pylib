@@ -60,7 +60,7 @@ class MqttHelper(metaclass=Singleton):
         self.client.on_message = self.__on_message
         self.__do_debug_print_out = False
         #self.client.loop_forever()
-         self.client.loop_start()
+        self.client.loop_start()
         # self.client.loop_stop()
         return self.client
 
