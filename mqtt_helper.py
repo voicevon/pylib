@@ -21,9 +21,9 @@ class MqttHelper(metaclass=Singleton):
     def __init__(self):
         # super(MqttHelper, self).__init__()
         self.__is_connected = False
-        self.__mqtt = None
-        # self.__mqtt = mqtt
-        # self.__mqtt = mqtt.Client(client_id)  # create new instance
+        self.client = None
+        # self.client = mqtt
+        # self.client = mqtt.Client(client_id)  # create new instance
 
         self.__YELLOW = TerminalFont.Color.Fore.yellow
         self.__GREEN = TerminalFont.Color.Fore.green
@@ -33,7 +33,10 @@ class MqttHelper(metaclass=Singleton):
         self.__on_message_callbacks = []
         self.__configable_vars = []
 
-    def on_connect(self,userdata,flags,rc):
+    def on_connect(self, client, userdata, flags,rc):
+        '''
+        rc == return code.
+        '''
         if rc==0:
             self.connected_flag=True #set flag
             print("MQTT connected OK. Start subscribe.  Returned code=",rc)
@@ -43,20 +46,21 @@ class MqttHelper(metaclass=Singleton):
             print("Bad connection Returned code= ",rc)      
 
     def connect_to_broker(self, client_id, broker, port, uid, psw):
-        self.__mqtt = mqtt.Client(client_id)  # create new instance
-        self.__mqtt.on_connect = self.on_connect  # binding call back function 
-        self.__mqtt.username_pw_set(username=uid, password=psw)
-        self.__mqtt.connect(broker, port=port)
-        if self.__mqtt.is_connected():
+        self.client = mqtt.Client(client_id)  # create new instance
+        self.client.on_connect = self.on_connect  # binding call back function 
+        self.client.username_pw_set(username=uid, password=psw)
+        self.client.connect(broker, port=port)
+        if self.client.is_connected():
             print(self.__GREEN + '[Info]: MQTT has connected to: %s' % broker + self.__RESET)
         else:
             print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s, Is trying auto connect backgroundly.' % broker + self.__RESET)
 
-        self.__mqtt.loop_start()
-        self.__mqtt.on_message = self.__mqtt_on_message
+        self.client.on_message = self.client_on_message
         self.__do_debug_print_out = False
-        # self.__mqtt.loop_stop()
-        return self.__mqtt
+        self.client.loop_forever()
+        # self.client.loop_start()
+        # self.client.loop_stop()
+        return self.client
 
     def append_on_message_callback(self, callback, do_debug_print_out=False):
         '''
@@ -70,7 +74,7 @@ class MqttHelper(metaclass=Singleton):
         self.__configable_vars.append(var)
 
     def subscribe(self, topic, qos=0):
-        self.__mqtt.subscribe(topic, qos)
+        self.client.subscribe(topic, qos)
     
     def auto_subscribe(self, qos=1, space_len=0):
         '''
@@ -94,7 +98,7 @@ class MqttHelper(metaclass=Singleton):
                             if type_value_topic == 'topic':
                                 topic_string = getattr(configable_item,type_value_topic)
                                 # print('cccc', type_value_topic,topic_string)
-                                self.__mqtt.subscribe(topic_string,qos)
+                                self.client.subscribe(topic_string,qos)
                     else:
                         self.find_member(attr, target_type_name, space_len + 4)
 
@@ -152,15 +156,15 @@ class MqttHelper(metaclass=Singleton):
         is_success, img_encode = cv2.imencode(".jpg", cv_image)
         if is_success:
             img_pub = img_encode.tobytes()
-            self.__mqtt.publish(topic, img_pub, retain=retain)
+            self.client.publish(topic, img_pub, retain=retain)
 
     def publish_file_image(self, topic, file_name, retain=True):
         with open(file_name, 'rb') as f:
             byte_im = f.read()
-        self.__mqtt.publish('sower/img/bin',byte_im )
+        self.client.publish('sower/img/bin',byte_im )
 
     def publish(self, topic, value):
-        self.__mqtt.publish(topic, value, qos=2, retain =True)
+        self.client.publish(topic, value, qos=2, retain =True)
     
 
 g_mqtt = MqttHelper()
