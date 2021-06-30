@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 from singleton import Singleton
 from terminal_font import TerminalFont
 import cv2
+import logging
 
 class MqttConfigableItem():
     topic = ''
@@ -125,11 +126,13 @@ class MqttHelper(metaclass=Singleton):
             #         else:
             #             self.find_member(attr, target_type_name, space_len + 4)
 
-    def update_from_topic(self, topic, value, space_len=0):
+    def update_from_topic(self, topic, value, space_len=3):
         '''
         call append_configable_var() in advance.
         '''
         target_type_name = 'MqttConfigableItem'
+        
+        print('aaaaaaaaaaaaaa', topic, value, space_len)
         if space_len / 8 >= 3:
             return
         for var in self.__configable_vars:
@@ -158,18 +161,21 @@ class MqttHelper(metaclass=Singleton):
                         self.find_member(attr, target_type_name, space_len + 4)
     
     def __on_message(self, client, userdata, message):
+        self.__do_debug_print_out = True
         if self.__do_debug_print_out:
-            print("MQTT message received ", str(message.payload.decode("utf-8")))
+            #print("MQTT message received ", str(message.payload.decode("utf-8")))
             print("MQTT message topic=", message.topic)
+            print('MQTT message payload=', message.payload)
             print("MQTT message qos=", message.qos)
             print("MQTT message retain flag=", message.retain)
         payload = str(message.payload.decode("utf-8"))
-
+        #print('ppppppppppppppppppppppppp',topic, payload)
         #Solution A:
         for invoking in self.__on_message_callbacks:
             invoking(message.topic, payload)
         #Solution B:
-        self.update_from_topic(self. message.topic, payload)
+        #logging.info('payload %s'oad)
+        self.update_from_topic(message.topic, payload)
     def publish_init(self):
         #  traverse Json file, publish all elements to broker with default values
         pass
