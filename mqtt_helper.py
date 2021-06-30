@@ -77,7 +77,14 @@ class MqttHelper(metaclass=Singleton):
     def subscribe(self, topic, qos=0):
         self.client.subscribe(topic, qos)
     
+
+
     def subscribe_with_var(self, var, qos=1, space_len=0):
+        '''
+        Search all members of var and childrens
+        if the member(or child, grand child)'s type is 'mqtt_configableItem'
+        subscribe it by the 'topic' of that member. 
+        '''
         if space_len / 8 >= 3:
             return
 
@@ -108,37 +115,22 @@ class MqttHelper(metaclass=Singleton):
 
         for var in self.__configable_vars:
             self.subscribe_with_var(var)
-            # for this_item in dir(var):
-            #     if this_item[:1] != '_':
-            #         attr = getattr(var,this_item)
-            #         type_name =type(attr).__name__
-            #         # space = ' ' * space_len
-            #         if type_name == target_type_name:
-            #             # For better understanding, we rename attr.
-            #             configable_item = attr  
-            #             # print ('aaaa', space + configable_item, type_name)
-            #             for type_value_topic in dir(configable_item):
-            #                 # print('bbbb',type_value_topic)
-            #                 if type_value_topic == 'topic':
-            #                     topic_string = getattr(configable_item,type_value_topic)
-            #                     # print('cccc', type_value_topic,topic_string)
-            #                     self.client.subscribe(topic_string,qos)
-            #         else:
-            #             self.find_member(attr, target_type_name, space_len + 4)
 
-    def update_from_topic(self, topic, value, space_len=3):
+
+    def update_leaf_by_topic(self, root_var, topic, payload, space_len=0):
         '''
-        call append_configable_var() in advance.
+        Search all members of var and childrens
+        if the member(or child, grand child)'s type is 'mqtt_configableItem', 
+            and the topic_string is wanted,
+        update the value of that member  to  payload. 
         '''
-        target_type_name = 'MqttConfigableItem'
-        
-        print('aaaaaaaaaaaaaa', topic, value, space_len)
         if space_len / 8 >= 3:
             return
-        for var in self.__configable_vars:
-            for this_item in dir(var):
+
+        target_type_name = 'MqttConfigableItem'
+        for this_item in dir(root_var):
                 if this_item[:1] != '_':
-                    attr = getattr(var,this_item)
+                    attr = getattr(root_var,this_item)
                     type_name =type(attr).__name__
                     # space = ' ' * space_len
 
@@ -156,9 +148,16 @@ class MqttHelper(metaclass=Singleton):
                                     if topic_string == topic:
                                         # print('RRRRRRRRRRRR', configable_item, type_value_topic, value)
                                         #TODO: type checking here.
-                                        setattr(configable_item,'value',value)
+                                        setattr(configable_item,'value',payload)
                     else:
-                        self.find_member(attr, target_type_name, space_len + 4)
+                        self.update_leaf_by_topic(attr, target_type_name, space_len + 4)
+
+    def update_from_topic(self, topic, payload, space_len=3):
+        '''
+        call append_configable_var() in advance.
+        '''
+        for var in self.__configable_vars:
+           self.update_leaf_by_topic(var,topic,payload)
     
     def __on_message(self, client, userdata, message):
         self.__do_debug_print_out = True
