@@ -76,31 +76,54 @@ class MqttHelper(metaclass=Singleton):
     def subscribe(self, topic, qos=0):
         self.client.subscribe(topic, qos)
     
+    def subscribe_with_var(self, var, qos=1, space_len=0):
+        if space_len / 8 >= 3:
+            return
+
+        target_type_name = 'MqttConfigableItem'
+        for this_item in dir(var):
+            if this_item[:1] != '_':
+                attr = getattr(var,this_item)
+                type_name =type(attr).__name__
+                # space = ' ' * space_len
+                if type_name == target_type_name:
+                    # For better understanding, we rename attr.
+                    configable_item = attr  
+                    # print ('aaaa', space + configable_item, type_name)
+                    for type_value_topic in dir(configable_item):
+                        # print('bbbb',type_value_topic)
+                        if type_value_topic == 'topic':
+                            topic_string = getattr(configable_item,type_value_topic)
+                            # print('cccc', type_value_topic,topic_string)
+                            self.client.subscribe(topic_string,qos)
+                else:
+                    self.subscribe_with_var(attr, qos, space_len + 4)
+
     def auto_subscribe(self, qos=1, space_len=0):
         '''
         call append_configable_var() in advance.
         '''
-        target_type_name = 'MqttConfigableItem'
-        if space_len / 8 >= 3:
-            return
+        # target_type_name = 'MqttConfigableItem'
+
         for var in self.__configable_vars:
-            for this_item in dir(var):
-                if this_item[:1] != '_':
-                    attr = getattr(var,this_item)
-                    type_name =type(attr).__name__
-                    # space = ' ' * space_len
-                    if type_name == target_type_name:
-                        # For better understanding, we rename attr.
-                        configable_item = attr  
-                        # print ('aaaa', space + configable_item, type_name)
-                        for type_value_topic in dir(configable_item):
-                            # print('bbbb',type_value_topic)
-                            if type_value_topic == 'topic':
-                                topic_string = getattr(configable_item,type_value_topic)
-                                # print('cccc', type_value_topic,topic_string)
-                                self.client.subscribe(topic_string,qos)
-                    else:
-                        self.find_member(attr, target_type_name, space_len + 4)
+            self.subscribe_with_var(var)
+            # for this_item in dir(var):
+            #     if this_item[:1] != '_':
+            #         attr = getattr(var,this_item)
+            #         type_name =type(attr).__name__
+            #         # space = ' ' * space_len
+            #         if type_name == target_type_name:
+            #             # For better understanding, we rename attr.
+            #             configable_item = attr  
+            #             # print ('aaaa', space + configable_item, type_name)
+            #             for type_value_topic in dir(configable_item):
+            #                 # print('bbbb',type_value_topic)
+            #                 if type_value_topic == 'topic':
+            #                     topic_string = getattr(configable_item,type_value_topic)
+            #                     # print('cccc', type_value_topic,topic_string)
+            #                     self.client.subscribe(topic_string,qos)
+            #         else:
+            #             self.find_member(attr, target_type_name, space_len + 4)
 
     def update_from_topic(self, topic, value, space_len=0):
         '''
