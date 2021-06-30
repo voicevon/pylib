@@ -33,6 +33,7 @@ class MqttHelper(metaclass=Singleton):
         # self.mqtt_system_turn_on = True
         self.__on_message_callbacks = []
         self.__configable_vars = []
+        self.__counter = 0
 
     def on_connect(self, client, userdata, flags,rc):
         '''
@@ -58,8 +59,8 @@ class MqttHelper(metaclass=Singleton):
 
         self.client.on_message = self.__on_message
         self.__do_debug_print_out = False
-        self.client.loop_forever()
-        # self.client.loop_start()
+        #self.client.loop_forever()
+         self.client.loop_start()
         # self.client.loop_stop()
         return self.client
 
@@ -85,8 +86,11 @@ class MqttHelper(metaclass=Singleton):
         if the member(or child, grand child)'s type is 'mqtt_configableItem'
         subscribe it by the 'topic' of that member. 
         '''
+        # TODO: remove build in methods
         if space_len / 8 >= 3:
             return
+        #self.__counter += 1
+        #print('oooo', self.__counter,var)
 
         target_type_name = 'MqttConfigableItem'
         for this_item in dir(var):
@@ -104,6 +108,7 @@ class MqttHelper(metaclass=Singleton):
                             topic_string = getattr(configable_item,type_value_topic)
                             # print('cccc', type_value_topic,topic_string)
                             self.client.subscribe(topic_string,qos)
+                            print('MQTT subscribed: Topic= ', topic_string)
                 else:
                     self.subscribe_with_var(attr, qos, space_len + 4)
 
@@ -126,7 +131,8 @@ class MqttHelper(metaclass=Singleton):
         '''
         if space_len / 8 >= 3:
             return
-
+        #self.__counter += 1
+        #print(self.__counter, root_var)
         target_type_name = 'MqttConfigableItem'
         for this_item in dir(root_var):
                 if this_item[:1] != '_':
@@ -149,18 +155,21 @@ class MqttHelper(metaclass=Singleton):
                                         # print('RRRRRRRRRRRR', configable_item, type_value_topic, value)
                                         #TODO: type checking here.
                                         setattr(configable_item,'value',payload)
+                                        print('Configable item is updated from MQTT-server, topic=%s, value=', topic, payload)
                     else:
-                        self.update_leaf_by_topic(attr, target_type_name, space_len + 4)
+                        self.update_leaf_by_topic(attr, topic, payload, space_len + 8)
 
     def update_from_topic(self, topic, payload, space_len=3):
         '''
         call append_configable_var() in advance.
         '''
+        self.__counter =0
         for var in self.__configable_vars:
-           self.update_leaf_by_topic(var,topic,payload)
+           self.update_leaf_by_topic(var, topic, payload)
+        print('======================================== update Done!')
     
     def __on_message(self, client, userdata, message):
-        self.__do_debug_print_out = True
+        #self.__do_debug_print_out = True
         if self.__do_debug_print_out:
             #print("MQTT message received ", str(message.payload.decode("utf-8")))
             print("MQTT message topic=", message.topic)
