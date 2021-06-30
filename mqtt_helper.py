@@ -55,7 +55,7 @@ class MqttHelper(metaclass=Singleton):
         else:
             print(self.__RED + '[Info]: MQTT has NOT!  connected to: %s, Is trying auto connect backgroundly.' % broker + self.__RESET)
 
-        self.client.on_message = self.client_on_message
+        self.client.on_message = self.__on_message
         self.__do_debug_print_out = False
         self.client.loop_forever()
         # self.client.loop_start()
@@ -134,7 +134,7 @@ class MqttHelper(metaclass=Singleton):
                     else:
                         self.find_member(attr, target_type_name, space_len + 4)
     
-    def __mqtt_on_message(self, client, userdata, message):
+    def __on_message(self, client, userdata, message):
         if self.__do_debug_print_out:
             print("MQTT message received ", str(message.payload.decode("utf-8")))
             print("MQTT message topic=", message.topic)
